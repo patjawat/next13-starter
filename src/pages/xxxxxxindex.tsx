@@ -6,7 +6,9 @@ import { Card, CardBody, Input } from "@nextui-org/react";
 import { GetServerSideProps } from 'next'
 import { signIn, signOut, useSession } from "next-auth/react"
 import Link from 'next/link'
-
+import { BsArrowLeftShort,BsSearch } from 'react-icons/bs'
+import { AiFillEnvironment } from 'react-icons/ai'
+import { BiSolidDashboard } from 'react-icons/bi'
 import { prisma } from '@/lib/prisma'
 import router from "next/router";
 
@@ -26,10 +28,25 @@ interface Post {
 
 const Home = ({ posts }: Posts) => {
 
+  const [open, setOpen] = useState(true);
   const [form, setForm] = useState<Post>({ id: '', title: '', content: '' });
 
-  const { data: session } = useSession()
-
+const Menus = [
+  {title:'Dashboard'},
+  {title:'Pages'},
+  {title:'Media',scaping: true},
+  {
+    title:'Projects',
+    submenu: true,
+    submenuItems:[
+      {title:'submenu 1'},
+      {title:'submenu 2'},
+      {title:'submenu 3'},
+    ]
+  },
+  {title:'Post'},
+  {title:'Product'},
+];
 
   const refreshData = () => {
     router.replace(router.asPath)
@@ -73,62 +90,31 @@ const Home = ({ posts }: Posts) => {
     }
   }
   return (
-    <div>
+    <div className="flex">
+      <div className={`bg-slate-700 h-screen p-5  ${open ? "w-72" : "w-20"} pt-8 duration-300 relative`}>
+        <BsArrowLeftShort onClick={() => setOpen(!open)} className={`bg-white text-3xl rounded-full absolute -right-3 top-9 border ${open && "rotate-180"}`} />
+        <div className="inline-flex">
+          <AiFillEnvironment className="bg-amber-300 text-4xl rounded cursor-pointer block float-left mr-2" />
 
-
-      {session && (
-        <>
-          {/* Signed in as {session.user.email} <br /> */}
-          <button onClick={() => signOut()}>Sign out</button>
-        </>
-      )}
-      {!session && (
-        <>
-          Not signed in <br />
-          <button onClick={() => signIn()}>Sign in</button>
-        </>
-      )}
-      <li>
-        <Link href="/post">About Us</Link>
-      </li>
-
-      <section className="bg-gray-50 flex justify-center">
-        <div className="bg-gray-100 px-5 py-12 md:w-96 rounded-2xl shadow-lg">
-
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            handelSubmit(form)
-          }}>
-
-            <div className="flex flex-col gap-5">
-
-              <Input type="text" label="Enter Title" name="title" value={form.title} onChange={e => { setForm({ ...form, title: e.target.value }) }} />
-
-              <Input type="text" label="Enter Content" name="content" value={form.content} onChange={e => { setForm({ ...form, content: e.target.value }) }} />
-
-            </div>
-            <div className="flex justify-center mt-5">
-              <Button className="item" type="submit">{form.id == '' ? 'save' : 'update'}</Button>
-            </div>
-
-          </form>
+          <h1 className={`text-white ml-1 duration-300 ${!open && "scale-0"}`}>MyApp</h1>
         </div>
-
-      </section>
-      <ul>
-        {posts.map(post => (
-          <li key={post.id} className="border-b border-gray-600 p-2">
-            <div className="flex justify-between">
-              <div className="flex-1">
-                <h3 className="font-bold">{post.title}</h3>
-                <p className="text-sm">{post.content}</p>
-              </div>
-              <button onClick={() => setForm({ title: post.title, content: post.content, id: post.id })} className="bg-blue-500 mr-3 px-3 text-white rounded">Update</button>
-              <button onClick={() => deletePost(post.id)} className="bg-red-500 px-3 text-white rounded">X</button>
-            </div>
+        <div className={`flex items-center bg-gray-500 py-2 mt-6 rounded-md ${!open ? "px-2.5" : "px-4"}`}>
+          <BsSearch  className={`text-lg text-white block float-left ${open && "mr-2"}`}/>
+          <input type="text" className={`text-base bg-transparent text-white w-full focus:outline-none ml-2 ${!open && "hidden"}`} placeholder="" />
+        </div>
+<ul className="mt-2"></ul>
+        {Menus.map((menu , index) => (
+    
+          <li className={`text-gray-300 text-sm flex items-center gap-x-4 cursor-pointer p-2 hover:bg-light-white`}>
+            <span className={`text-2xl block float-left`}><BiSolidDashboard /></span>
+            <span>{menu.title}</span>
           </li>
+        
         ))}
-      </ul>
+      </div>
+      <div className="p-10">
+        <h1>Home page</h1>
+      </div>
     </div>
   );
 }
